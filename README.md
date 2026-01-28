@@ -1,4 +1,3 @@
-
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
 </p>
@@ -19,12 +18,12 @@
 Mini CRM Backend built with **NestJS**, **PostgreSQL**, and **Prisma ORM**.  
 Features include:
 
-- JWT Authentication with **ADMIN** and **EMPLOYEE** roles  
-- Users, Customers, and Tasks modules  
-- Role-based access control  
-- CRUD operations, pagination, search  
-- Swagger API documentation  
-- Docker support with PostgreSQL  
+- JWT Authentication with **ADMIN** and **EMPLOYEE** roles
+- Users, Customers, and Tasks modules
+- Role-based access control
+- CRUD operations, pagination, search
+- Swagger API documentation
+- Docker support with PostgreSQL
 
 ---
 
@@ -46,7 +45,7 @@ JWT_SECRET=supersecretkey
 
 # Application
 PORT=3000
-````
+```
 
 ---
 
@@ -140,9 +139,9 @@ $ npm run test:cov
 
 A complete **Postman collection** is available in the repository:
 
-* `MiniCRM.postman_collection.json`
-* Includes **Auth, Users, Customers, Tasks** endpoints
-* Supports JWT token authentication
+- `MiniCRM.postman_collection.json`
+- Includes **Auth, Users, Customers, Tasks** endpoints
+- Supports JWT token authentication
 
 Example `curl` for login:
 
@@ -155,6 +154,13 @@ curl -X POST http://localhost:3000/auth/login \
 ---
 
 ## Deployment
+
 ```bash
 https://minicrm-ffua.onrender.com
+```
+
+# Postman Collections
+
+```bash
+https://universal-sunset-296355.postman.co/workspace/todo~16c1322e-b720-4e6a-a9b1-87af3c9b2016/collection/29288755-12498507-66a4-48ad-bedc-9c214cf9440f?action=share&creator=29288755
 ```
