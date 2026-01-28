@@ -155,3 +155,6 @@ curl -X POST http://localhost:3000/auth/login \
 ---
 
 ## Deployment
+```bash
+https://minicrm-ffua.onrender.com
+```
