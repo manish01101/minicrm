@@ -22,4 +22,19 @@ describe('AppController (e2e)', () => {
       .expect(200)
       .expect('Hello World!');
   });
+  
+  it('/test/any-user (GET)', async () => {
+  const loginRes = await request(app.getHttpServer())
+    .post('/auth/login')
+    .send({ email: 'admin@test.com', password: 'password123' })
+
+  const token = loginRes.body.accessToken
+
+  return request(app.getHttpServer())
+    .get('/test/any-user')
+    .set('Authorization', `Bearer ${token}`)
+    .expect(200)
+    .expect({ message: 'Hello Authenticated User!' })
+})
+
 });
