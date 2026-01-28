@@ -96,3 +96,211 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## License
 
 Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+
+
+
+---
+---
+---
+## testing with curl
+
+## **1 Auth Module Testing**
+
+### **1.1 Register Admin User**
+
+```bash
+curl -X POST http://localhost:3000/auth/register \
+-H "Content-Type: application/json" \
+-d '{
+  "name": "Admin User",
+  "email": "admin@test.com",
+  "password": "password123",
+  "role": "ADMIN"
+}'
+```
+
+**Expected Response:**
+
+```json
+{
+  "id": 1,
+  "name": "Admin User",
+  "email": "admin@test.com",
+  "role": "ADMIN"
+}
+```
+
+---
+
+### **1.2 Login Admin User**
+
+```bash
+curl -X POST http://localhost:3000/auth/login \
+-H "Content-Type: application/json" \
+-d '{
+  "email": "admin@test.com",
+  "password": "password123"
+}'
+```
+
+**Expected Response:**
+
+```json
+{
+  "accessToken": "YOUR_JWT_TOKEN_HERE",
+  "user": {
+    "id": 1,
+    "name": "Admin User",
+    "email": "admin@test.com",
+    "role": "ADMIN"
+  }
+}
+```
+
+> Copy `accessToken` — you’ll use it for all Users module requests.
+
+---
+
+## 2.Users Module Testing (ADMIN only)
+
+> **Important:** All requests must include:
+> `-H "Authorization: Bearer YOUR_JWT_TOKEN_HERE"`
+
+---
+
+### **2.1 Create a new user**
+
+```bash
+curl -X POST http://localhost:3000/users \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc2OTYwMDg1MywiZXhwIjoxNzY5Njg3MjUzfQ.0QFATjMwhn1oEEY87cdqkra5n9wdrm5We5AyXxuYBOU" \
+-d '{
+  "name": "Test User",
+  "email": "testuser@test.com",
+  "password": "password123",
+  "role": "USER"
+}'
+```
+
+**Response:**
+
+```json
+{
+  "id": 2,
+  "name": "Test User",
+  "email": "testuser@test.com",
+  "role": "USER"
+}
+```
+
+---
+
+### **2.2 List all users**
+
+```bash
+curl -X GET http://localhost:3000/users \
+-H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc2OTYwMDg1MywiZXhwIjoxNzY5Njg3MjUzfQ.0QFATjMwhn1oEEY87cdqkra5n9wdrm5We5AyXxuYBOU"
+```
+
+**Response:**
+
+```json
+[
+  {
+    "id": 1,
+    "name": "Admin User",
+    "email": "admin@test.com",
+    "role": "ADMIN"
+  },
+  {
+    "id": 2,
+    "name": "Test User",
+    "email": "testuser@test.com",
+    "role": "USER"
+  }
+]
+```
+
+---
+
+### **2.3 Get a single user**
+
+```bash
+curl -X GET http://localhost:3000/users/2 \
+-H "Authorization: Bearer YOUR_JWT_TOKEN_HERE"
+```
+
+**Response:**
+
+```json
+{
+  "id": 2,
+  "name": "Test User",
+  "email": "testuser@test.com",
+  "role": "USER"
+}
+```
+
+---
+
+### **2.4 Update a user**
+
+```bash
+curl -X PATCH http://localhost:3000/users/2 \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc2OTYwMDg1MywiZXhwIjoxNzY5Njg3MjUzfQ.0QFATjMwhn1oEEY87cdqkra5n9wdrm5We5AyXxuYBOU" \
+-d '{
+  "name": "Updated User",
+  "role": "ADMIN"
+}'
+```
+
+**Response:**
+
+```json
+{
+  "id": 2,
+  "name": "Updated User",
+  "email": "testuser@test.com",
+  "role": "USER"
+}
+```
+
+> Password can also be updated; it will be hashed automatically.
+
+---
+
+### **2.5 Delete a user**
+
+```bash
+curl -X DELETE http://localhost:3000/users/2 \
+-H "Authorization: Bearer YOUR_JWT_TOKEN_HERE"
+```
+
+**Response:**
+
+```json
+{
+  "id": 2,
+  "name": "Updated User",
+  "email": "testuser@test.com",
+  "role": "USER"
+}
+```
+
+---
+
+### **2.6 Test JWT & Roles Guard**
+
+* **Without token:** should return `401 Unauthorized`
+* **Non-ADMIN token:** should return `403 Forbidden`
+* **Admin token:** full access
+
+---
+**Postman**:
+
+1. POST `/auth/login` → get token
+2. Create a **Bearer Token** in Authorization tab
+3. Test all `/users` endpoints using JSON body
+
+---
