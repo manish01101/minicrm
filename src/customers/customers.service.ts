@@ -29,7 +29,7 @@ export class CustomersService {
 
   async findAll(page = 1, limit = 10) {
     const skip = (page - 1) * limit;
-    const [data, total] = await Promise.all([
+    const [data, totalRecords] = await Promise.all([
       this.prisma.customer.findMany({ skip, take: limit }),
       this.prisma.customer.count(),
     ]);
@@ -38,8 +38,8 @@ export class CustomersService {
       data,
       page,
       limit,
-      total,
-      totalPages: Math.ceil(total / limit),
+      totalRecords,
+      totalPages: Math.ceil(totalRecords / limit),
     };
   }
 
