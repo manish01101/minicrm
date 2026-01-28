@@ -1,9 +1,13 @@
-import { Injectable, ConflictException, UnauthorizedException } from '@nestjs/common'
-import { JwtService } from '@nestjs/jwt'
-import * as bcrypt from 'bcrypt'
-import { PrismaService } from '../prisma/prisma.service'
-import { RegisterDto } from './dto/register.dto'
-import { LoginDto } from './dto/login.dto'
+import {
+  Injectable,
+  ConflictException,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcrypt';
+import { PrismaService } from '../prisma/prisma.service';
+import { RegisterDto } from './dto/register.dto';
+import { LoginDto } from './dto/login.dto';
 
 @Injectable()
 export class AuthService {
@@ -13,49 +17,48 @@ export class AuthService {
   ) {}
 
   async register(dto: RegisterDto) {
-    const existingUser = await this.prisma.user.findUnique({
-      where: { email: dto.email },
-    })
+    try {
+      const hashedPassword = await bcrypt.hash(dto.password, 10);
 
-    if (existingUser) {
-      throw new ConflictException('Email already exists')
-    }
+      const user = await this.prisma.user.create({
+        data: {
+          name: dto.name,
+          email: dto.email,
+          password: hashedPassword,
+          role: dto.role,
+        },
+      });
 
-    const hashedPassword = await bcrypt.hash(dto.password, 10)
-
-    const user = await this.prisma.user.create({
-      data: {
-        name: dto.name,
-        email: dto.email,
-        password: hashedPassword,
-        role: dto.role,
-      },
-    })
-
-    return {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
+      return {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      };
+    } catch (error: any) {
+      if (error.code === 'P2002') {
+        throw new ConflictException('Email already exists');
+      }
+      throw error;
     }
   }
 
   async login(dto: LoginDto) {
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email },
-    })
+    });
 
     if (!user) {
-      throw new UnauthorizedException('Invalid email or password')
+      throw new UnauthorizedException('Invalid email or password');
     }
 
-    const isPasswordValid = await bcrypt.compare(dto.password, user.password)
+    const isPasswordValid = await bcrypt.compare(dto.password, user.password);
 
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid email or password')
+      throw new UnauthorizedException('Invalid email or password');
     }
 
-    const payload = { userId: user.id, role: user.role }
+    const payload = { userId: user.id, role: user.role };
 
     return {
       accessToken: this.jwtService.sign(payload),
@@ -65,6 +68,6 @@ export class AuthService {
         email: user.email,
         role: user.role,
       },
-    }
+    };
   }
 }

@@ -173,12 +173,12 @@ curl -X POST http://localhost:3000/auth/login \
 ```bash
 curl -X POST http://localhost:3000/users \
 -H "Content-Type: application/json" \
--H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc2OTYwMDg1MywiZXhwIjoxNzY5Njg3MjUzfQ.0QFATjMwhn1oEEY87cdqkra5n9wdrm5We5AyXxuYBOU" \
+-H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc2OTYwNDc3OSwiZXhwIjoxNzY5NjkxMTc5fQ.W6qZoy29EMshvk6qW-c681kiYcE5lUt9MLyPRihWMPI" \
 -d '{
   "name": "Test User",
-  "email": "testuser@test.com",
+  "email": "testuser23@test.com",
   "password": "password123",
-  "role": "USER"
+  "role": "ADMIN"
 }'
 ```
 
@@ -199,7 +199,7 @@ curl -X POST http://localhost:3000/users \
 
 ```bash
 curl -X GET http://localhost:3000/users \
--H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc2OTYwMDg1MywiZXhwIjoxNzY5Njg3MjUzfQ.0QFATjMwhn1oEEY87cdqkra5n9wdrm5We5AyXxuYBOU"
+-H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc2OTYwNDc3OSwiZXhwIjoxNzY5NjkxMTc5fQ.W6qZoy29EMshvk6qW-c681kiYcE5lUt9MLyPRihWMPI"
 ```
 
 **Response:**
@@ -304,3 +304,146 @@ curl -X DELETE http://localhost:3000/users/2 \
 3. Test all `/users` endpoints using JSON body
 
 ---
+
+`curl` commands** for **all Customers module endpoints**
+* **POST /customers** → ADMIN only
+* **GET /customers** → ADMIN + EMPLOYEE
+* **GET /customers/:id** → ADMIN + EMPLOYEE
+* **PATCH /customers/:id** → ADMIN only
+* **DELETE /customers/:id** → ADMIN only
+* Include **JWT Authorization**
+
+---
+### **Create a customer (ADMIN only)**
+
+```bash
+curl -X POST http://localhost:3000/customers \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc2OTYwNDc3OSwiZXhwIjoxNzY5NjkxMTc5fQ.W6qZoy29EMshvk6qW-c681kiYcE5lUt9MLyPRihWMPI" \
+-d '{
+  "name": "Acme Corp",
+  "email": "contact1234@acme.com",
+  "phone": "1234567777"
+}'
+```
+
+**Expected response:**
+
+```json
+{
+  "id": 1,
+  "name": "Acme Corp",
+  "email": "contact@acme.com",
+  "phone": "1234567890"
+}
+```
+
+> Duplicate email or phone → `409 Conflict`
+
+---
+
+### **4. Get customers list (ADMIN + EMPLOYEE)**
+
+```bash
+curl -X GET "http://localhost:3000/customers?page=1&limit=10" \
+-H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc2OTYwNDc3OSwiZXhwIjoxNzY5NjkxMTc5fQ.W6qZoy29EMshvk6qW-c681kiYcE5lUt9MLyPRihWMPI"
+```
+
+Or with employee token:
+
+```bash
+-H "Authorization: Bearer EMPLOYEE_JWT_TOKEN"
+```
+
+**Response:**
+
+```json
+{
+  "data": [
+    { "id": 1, "name": "Acme Corp", "email": "contact@acme.com", "phone": "1234567890" }
+  ],
+  "page": 1,
+  "limit": 10,
+  "totalRecords": 1,
+  "totalPages": 1
+}
+```
+
+---
+
+### **5. Get a single customer (ADMIN + EMPLOYEE)**
+
+```bash
+curl -X GET http://localhost:3000/customers/1 \
+-H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc2OTYwNDc3OSwiZXhwIjoxNzY5NjkxMTc5fQ.W6qZoy29EMshvk6qW-c681kiYcE5lUt9MLyPRihWMPI"
+```
+
+Or with employee token:
+
+```bash
+-H "Authorization: Bearer EMPLOYEE_JWT_TOKEN"
+```
+
+**Response:**
+
+```json
+{
+  "id": 1,
+  "name": "Acme Corp",
+  "email": "contact@acme.com",
+  "phone": "1234567890"
+}
+```
+
+> Invalid ID → `404 Not Found`
+
+---
+
+### **6. Update customer (ADMIN only)**
+
+```bash
+curl -X PATCH http://localhost:3000/customers/1 \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc2OTYwNDc3OSwiZXhwIjoxNzY5NjkxMTc5fQ.W6qZoy29EMshvk6qW-c681kiYcE5lUt9MLyPRihWMPI" \
+-d '{
+  "name": "Acme Corporation",
+  "phone": "0987654321"
+}'
+```
+
+**Response:**
+
+```json
+{
+  "id": 1,
+  "name": "Acme Corporation",
+  "email": "contact@acme.com",
+  "phone": "0987654321"
+}
+```
+
+> Non-admin token → `403 Forbidden`
+> Duplicate email/phone → `409 Conflict`
+
+---
+
+### **7. Delete customer (ADMIN only)**
+
+```bash
+curl -X DELETE http://localhost:3000/customers/1 \
+-H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc2OTYwNDc3OSwiZXhwIjoxNzY5NjkxMTc5fQ.W6qZoy29EMshvk6qW-c681kiYcE5lUt9MLyPRihWMPI"
+```
+
+**Response:**
+
+```json
+{
+  "id": 1,
+  "name": "Acme Corporation",
+  "email": "contact@acme.com",
+  "phone": "0987654321"
+}
+```
+
+> Non-admin → `403 Forbidden`
+> Invalid ID → `404 Not Found`
