@@ -140,6 +140,38 @@ describe('E2E Tests (Auth, Users, Customers, Tasks)', () => {
     expect(res.body.id).toBe(customerId);
   });
 
+  it('GET /customers?search - ADMIN filters customers', async () => {
+    // Generate unique phone for search customer
+    const searchCustomerPhone = `8${Date.now()}`.slice(-10);
+
+    // create a customer specifically for search
+    await request(app.getHttpServer())
+      .post('/customers')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({
+        name: 'Acme Search',
+        email: `acme-search+${Date.now()}@test.com`,
+        phone: searchCustomerPhone,
+        company: 'Acme Co',
+      });
+
+    const res = await request(app.getHttpServer())
+      .get('/customers?search=Acme')
+      .set('Authorization', `Bearer ${adminToken}`);
+
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.body.data)).toBe(true);
+    expect(
+      res.body.data.every(
+        (c: any) =>
+          c.name.toLowerCase().includes('acme') ||
+          c.email.toLowerCase().includes('acme') ||
+          c.phone.toLowerCase().includes('acme') ||
+          c.company.toLowerCase().includes('acme'),
+      ),
+    ).toBe(true);
+  });
+
   it('PATCH /customers/:id - ADMIN updates customer', async () => {
     const res = await request(app.getHttpServer())
       .patch(`/customers/${customerId}`)

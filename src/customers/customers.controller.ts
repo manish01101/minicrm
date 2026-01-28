@@ -27,10 +27,11 @@ export class CustomersController {
 
   @Get()
   findAll(
-    @Query('page', ParseIntPipe) page = 1,
-    @Query('limit', ParseIntPipe) limit = 10,
+    @Query('page', new ParseIntPipe({ optional: true })) page = 1,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit = 10,
+    @Query('search') search?: string,
   ) {
-    return this.customersService.findAll(page, limit);
+    return this.customersService.findAll(page, limit, search);
   }
 
   @Get(':id')

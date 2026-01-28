@@ -27,19 +27,33 @@ export class CustomersService {
     }
   }
 
-  async findAll(page = 1, limit = 10) {
+  async findAll(page = 1, limit = 10, search?: string) {
     const skip = (page - 1) * limit;
-    const [data, totalRecords] = await Promise.all([
-      this.prisma.customer.findMany({ skip, take: limit }),
-      this.prisma.customer.count(),
+
+    let where = {};
+
+    if (search) {
+      where = {
+        OR: [
+          { name: { contains: search, mode: 'insensitive' } },
+          { email: { contains: search, mode: 'insensitive' } },
+          { phone: { contains: search, mode: 'insensitive' } },
+          { company: { contains: search, mode: 'insensitive' } },
+        ],
+      };
+    }
+
+    const [data, total] = await Promise.all([
+      this.prisma.customer.findMany({ where, skip, take: limit }),
+      this.prisma.customer.count({ where }),
     ]);
 
     return {
       data,
       page,
       limit,
-      totalRecords,
-      totalPages: Math.ceil(totalRecords / limit),
+      totalRecords: total,
+      totalPages: Math.ceil(total / limit),
     };
   }
 
